@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberNet - Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            background-image: url('{{ url_for("static", filename="background.jpg") }}');
+            background-size: cover;
+            background-position: center;
+            font-family: Arial, sans-serif;
+            color: #eeeaea;
+            margin: 0;
+        }
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80vh;
+            flex-direction: column;
+            padding: 30px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 5px;
+        }
+
+        .logo img {
+            width: 100px; /* Adjust the size of the logo */
+            margin-right: -35px; /* Adjust the space between the image and text */
+        }
+
+        .logo h1 {
+            margin: 0;
+            font-size: 35px; /* Adjust the font size as needed */
+            white-space: nowrap; /* Prevent text wrapping */
+        }
+        .login-form {
+            background:  rgba(129, 96, 96, 0.8);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(229, 166, 166, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        .login-form h2 {
+            margin-bottom: 20px;
+        }
+        .login-form label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .login-form input[type="email"],
+        .login-form input[type="password"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .login-form button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        .login-form button:hover {
+            background-color: #45a049;
+        }
+        .flash-message {
+            color: red;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .login-form p {
+            margin-top: 10px;
+        }
+        .login-form a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        .login-form a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="CyberNet">
+            <h1>CyberNet</h1>
+        </div>
+        <div class="login-form">
+            <h2>Login</h2>
+            <p>Doesn't have an account yet? <a href="{{ url_for('signup') }}">Sign Up</a></p>
+            <form action="{{ url_for('login') }}" method="post">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter 6 characters or more" required>
+                <button type="submit" class="login-btn">LOGIN</button>
+            </form>
+            {% with messages = get_flashed_messages(with_categories=True) %}
+                {% if messages %}
+                    <div class="flash-message">
+                    {% for category, message in messages %}
+                        {{ message }}<br>
+                    {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+</body>
+</html>

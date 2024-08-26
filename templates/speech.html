@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech Functionality - CyberNet</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        /* Add background image to the body */
+        body {
+            background-image: url('{{ url_for('static', filename='cs bg1.avif') }}'); /* Replace with your background image */
+            background-size: cover; /* Ensure the image covers the whole page */
+            background-position: center; /* Center the image */
+            background-repeat: no-repeat; /* Avoid repeating the image */
+            background-attachment: fixed; /* Keep the background fixed during scrolling */
+            color: white; /* Set text color to white for better contrast */
+        }
+
+        /* Optional: Add some styling to the header, buttons, and qa-container for better visibility */
+        header, .speech-input, .qa-container {
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        /* Style the buttons for better contrast */
+        button {
+            background-color: rgba(255, 255, 255, 0.8); /* Light background for buttons */
+            color: black; /* Dark text color for better readability */
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: rgba(255, 255, 255, 1); /* Fully opaque on hover */
+        }
+
+        .logo img {
+            max-width: 100px; /* Adjust the size of the logo if needed */
+        }
+
+        .qa-container {
+            margin-top: 20px;
+        }
+
+        .completion {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="{{ url_for('static', filename='logo3.png') }}" alt="AgroCare">
+            <h1>CyberNet</h1>
+        </div>
+        <div class="title">
+            <h2>Ask Your Questions!!</h2>
+        </div>
+        <div class="language-switcher">
+            <button id="lang-toggle">English</button>
+        </div>
+    </header>
+    <main>
+        <div class="speech-input">
+            <button id="startSpeechButton" onclick="startSpeechRecognition()">🎤 Start Talking</button>
+            <button class="go-back-button" onclick="window.history.back()">Go Back</button> <!-- Go Back button -->
+        </div>
+        <!-- Container for displaying the question and response -->
+        <div class="qa-container" id="botResponse"></div>
+    </main>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        // Check for browser support
+        if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+            alert('Speech recognition is not supported in this browser.');
+        }
+
+        function startSpeechRecognition() {
+            // Clear previous messages
+            document.getElementById('botResponse').innerHTML = '';
+
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false; // Only return final results
+
+            recognition.onstart = function() {
+                console.log('Voice recognition started. Speak into the microphone.');
+            };
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+
+                // Create a div for the question
+                const questionDiv = document.createElement('div');
+                questionDiv.classList.add('completion');
+                questionDiv.innerHTML = `<strong>Question:</strong> ${transcript}`; // Display the question
+
+                // Append the question to the bot response div
+                document.getElementById('botResponse').appendChild(questionDiv);
+
+                speakText(transcript); // Read the transcript aloud
+                submitQuestion(transcript); // Send the recognized text to the backend
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                alert('Error occurred in speech recognition: ' + event.error);
+            };
+
+            recognition.onend = function() {
+                console.log('Voice recognition ended.');
+            };
+
+            recognition.start();
+        }
+
+        function speakText(text) {
+            if (text) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.onend = function() {
+                    console.log('Speech finished.');
+                };
+                utterance.onerror = function(event) {
+                    console.error('Speech synthesis error:', event);
+                };
+                window.speechSynthesis.speak(utterance);
+            } else {
+                console.warn('No text to speak.');
+            }
+        }
+
+        function submitQuestion(question) {
+            $.ajax({
+                url: '/ask', // Replace with your backend URL
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ question: question }),
+                success: function(response) {
+                    var answer = response.answer;
+                    console.log('Answer:', answer);
+                    // Create a div for the answer
+                    const answerDiv = document.createElement('div');
+                    answerDiv.classList.add('completion');
+                    answerDiv.innerHTML = `<strong>Response:</strong> ${answer}`; // Display the answer
+
+                    // Append the answer to the bot response div
+                    document.getElementById('botResponse').appendChild(answerDiv);
+
+                    speakText(answer); // Read the answer aloud
+                },
+                error: function(error) {
+                    console.error('Error:', error);
+                    alert('Error occurred while sending the question. Please try again later.');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberCare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        /* Add background image to the body */
+        body {
+            background-image: url('{{ url_for('static', filename='cs bg1.avif') }}');
+            background-size: cover; /* Ensure the image covers the whole page */
+            background-position: center; /* Center the image */
+            background-repeat: no-repeat; /* Avoid repeating the image */
+            background-attachment: fixed; /* Keep the background fixed during scrolling */
+            color: white; /* Set text color to white for better contrast */
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        .background-image {
+            position: absolute;
+            left: 10px;
+            top: 60%;
+            transform: translateY(-50%);
+            max-width: 150px;
+            opacity: 0.8;
+        }
+
+        .examples-container {
+            position: relative;
+        }
+
+        /* Style other elements as needed for contrast */
+        .header, .title, .question-input, .bot-response {
+            background-color: rgba(0, 0, 0, 0.5); /* Optional: Add a semi-transparent background for better readability */
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .submit-btn img {
+            filter: invert(100%); /* Invert button icon color if needed */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="{{ url_for('static', filename='logo3.png') }}" alt="CyberNet">
+            <h1>CyberNet</h1>
+        </div>
+        <div class="title">
+            <h2>AI SOLUTIONS FOR DIGITAL SAFETY</h2>
+        </div>
+        <div class="language-switcher">
+            <button id="logoutButton" onclick="window.location.href='{{ url_for('logout') }}'">Logout</button>
+        </div>
+    </header>
+    <main>
+        <div class="button-container">
+            <button id="letsTalkButton" onclick="window.location.href='{{ url_for('speech') }}'">Let's Talk</button>
+            <button id="refresh-button" onclick="location.reload();">Refresh</button>
+        </div>
+        <div class="question-input">
+            <input type="text" id="questionInput" placeholder="Type your question..." onfocus="clearExamples()" oninput="clearExamples()">
+            <button class="submit-btn" onclick="submitQuestion()">
+                <img src="{{ url_for('static', filename='send1.png') }}" alt="Send">
+            </button>
+        </div>
+
+        <div class="examples-container">
+            <div class="examples" id="examples">
+                <p>Few examples to ask!</p>
+                <ul>
+                    <li onclick="insertExample('What are the best practices for securing a network?')">What are the best practices for securing a network?</li>
+                    <li onclick="insertExample('How can I protect against phishing attacks?')">How can I protect against phishing attacks?</li>
+                    <li onclick="insertExample('What is multi-factor authentication and why is it important?')">What is multi-factor authentication and why is it important?</li>
+                    <li onclick="insertExample('How do I secure sensitive data in transit?')">How do I secure sensitive data in transit?</li>
+                </ul>
+            </div>
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Background Image" class="background-image">
+        </div>
+        
+        <div class="bot-response" id="botResponse"></div>
+    </main>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        function clearExamples() {
+            document.getElementById('examples').style.display = 'none';
+        }
+
+        function insertExample(exampleText) {
+            document.getElementById('questionInput').value = exampleText;
+            clearExamples();
+        }
+
+        function submitQuestion() {
+            var question = document.getElementById('questionInput').value;
+            if (!question) return;
+            
+            $.ajax({
+                url: '/ask',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ question: question }),
+                success: function(response) {
+                    var answer = response.answer;
+                    console.log('Answer:', answer);
+                    document.getElementById('botResponse').innerHTML = `<div class="completion">${answer}</div>`;
+                },
+                error: function(error) {
+                    console.error('Error:', error);
+                    alert('Error occurred. Please try again later.');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
